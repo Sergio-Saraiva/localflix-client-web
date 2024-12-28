@@ -6,4 +6,5 @@ export interface File {
     time_length: number;
     thumbnail_url: string;
     subtitles_url: string;
+    content_length: number;
 }

@@ -1,47 +1,42 @@
-import { Button } from "@/components/ui/button";
-import { Maximize, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { FC, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+
+
 export const PlayerPage: FC = () => {
     const [isPlaying, setIsPlaying] = useState(false)
-    const [isMuted, setIsMuted] = useState(false)
     const [videoUrl, setVideoUrl] = useState<string | null>(null)
+    const [videoSize, setVideoSize] = useState<number | null>(null)
     const [subtitlesUrl, setSubtitlesUrl] = useState<string | null>(null)
     const videoRef = useRef<HTMLVideoElement>(null)
+    const chunkSize = 300 * 1024 * 1024; // 300 MB
+
     const [searchParams] = useSearchParams()
+
     const fileName = searchParams.get('file_name')
     const folderId = searchParams.get('folder_id')
     const subtitles = searchParams.get('subtitles_url')
     const thumbnailUrl = searchParams.get('thumbnail_url')
 
-    const togglePlay = () => {
+    useEffect(() => {
         if (videoRef.current) {
-        if (isPlaying) {
-            videoRef.current.pause()
-        } else {
-            videoRef.current.play()
+            videoRef.current.onplay = () => setIsPlaying(true)
+            videoRef.current.onpause = () => setIsPlaying(false)
         }
-        setIsPlaying(!isPlaying)
-        }
+    }, [videoRef])
+
+    const fetchVideo = async (url: string) => {
+        const response = await fetch(url);
+
     }
 
-    const toggleMute = () => {
-        if (videoRef.current) {
-        videoRef.current.muted = !isMuted
-        setIsMuted(!isMuted)
+    useEffect(() => {
+        if(videoUrl) {
+            const result =
         }
-    }
-
-    const toggleFullscreen = () => {
-        if (videoRef.current) {
-            if (document.fullscreenElement) {
-                document.exitFullscreen()
-            } else {
-                videoRef.current.requestFullscreen()
-            }
-        }
-    }
+    }, [videoUrl])
+    
+    
 
     useEffect(() => {
         if (subtitles) {
@@ -53,20 +48,7 @@ export const PlayerPage: FC = () => {
     }, [subtitles])
 
     useEffect(() => {
-        const video = videoRef.current
-        if (video) {
-        const updatePlayState = () => setIsPlaying(!video.paused)
-        video.addEventListener('play', updatePlayState)
-        video.addEventListener('pause', updatePlayState)
-        return () => {
-            video.removeEventListener('play', updatePlayState)
-            video.removeEventListener('pause', updatePlayState)
-        }
-        }
-    }, [])
-
-    useEffect(() => {
-        setVideoUrl(`http://192.168.1.195:3000/stream/${folderId}/${fileName}`)
+        setVideoUrl(`http://192.168.1.195:3001/stream/${folderId}/${fileName}`)
     }, [fileName, folderId])
 
     if (!videoUrl) {
@@ -83,16 +65,11 @@ export const PlayerPage: FC = () => {
                 alt="Video thumbnail"
                 className="absolute inset-0 w-full h-full object-cover"
             />
-            )}
-            <video
-                ref={videoRef}
-                className="w-full h-full"
-                src={videoUrl}
-            >
-                <track kind="subtitles" src={subtitlesUrl!} label="English" default />
+            )}                
+             <video ref={videoRef} className="w-full h-full" controls autoPlay>
                 Your browser does not support the video tag.
             </video>
-            <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-50 text-white p-2 flex justify-between items-center">
+            {/* <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-50 text-white p-2 flex justify-between items-center">
             <Button variant="ghost" size="icon" onClick={togglePlay}>
                 {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
             </Button>
@@ -102,7 +79,7 @@ export const PlayerPage: FC = () => {
             <Button variant="ghost" size="icon" onClick={toggleFullscreen}>
                 <Maximize className="h-6 w-6" />
             </Button>
-            </div>
+            </div> */}
         </div>
         </div>
     )

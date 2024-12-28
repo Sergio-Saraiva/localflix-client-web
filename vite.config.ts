@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/subtitles': {
-        target: 'http://192.168.1.195:3000', // Fiber server
+        target: 'http://192.168.1.195:3001', // Fiber server
         changeOrigin: true,
       },
     },
